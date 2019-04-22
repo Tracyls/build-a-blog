@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app= Flask(__name__)
 app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://build-a-blog:assignment2.11@localhost:8889/build-a-blog'
+app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://build-a-blog:Assignment2.11@localhost:8889/build-a-blog'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
@@ -16,12 +16,15 @@ class Blog(db.Model):
         self.title = title
         self.post = post
 
+@app.route('/')
+def index():
+    return redirect('/blog')
 
 @app.route('/blog')
-def show_blog():
+def display_blogs():
     post_id = request.args.get('id')
     if (post_id):
-        ind_post = Blog.query.get(post_id)
+        indiv_post = Blog.query.get(post_id)
         return render_template('indiv_post.html', indiv_post=indiv_post)
     else:
         all_blog_posts = Blog.query.all()
@@ -48,20 +51,20 @@ def add_entry():
         post_new = Blog(post_title, post_entry)
 
         
-        if no_text(post_title) and no_text(post_entry):
+        if not no_text(post_title) and not no_text(post_entry):
             db.session.add(post_new)
             db.session.commit()
             post_link = "/blog?id=" + str(post_new.id)
             return redirect(post_link)
         else:
-            if not no_text(post_title) and not no_text(post_entry):
+            if no_text(post_title) and no_text(post_entry):
                 title_error = "Please enter text for blog title"
                 blog_entry_error = "Please enter text for blog entry"
                 return render_template('new_post.html', blog_entry_error=blog_entry_error, title_error=title_error)
-            elif not no_text(post_title):
+            elif no_text(post_title):
                 title_error = "Please enter text for blog title"
                 return render_template('new_post.html', title_error=title_error, post_entry=post_entry)
-            elif not no_text(post_entry):
+            elif no_text(post_entry):
                 blog_entry_error = "Please enter text for blog entry"
                 return render_template('new_post.html', blog_entry_error=blog_entry_error, post_title=post_title)
 
